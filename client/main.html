@@ -1,0 +1,50 @@
+<head>
+  <title>drone-charge</title>
+</head>
+
+<body>
+  <h1>Welcome to Meteor!</h1>
+  {{#if currentUser}}
+    {{> dashboard}}
+  {{else}}
+    {{> register}}
+    {{> login}}
+  {{/if}}
+</body>
+
+<template name="register">
+<form>
+  <input type="text" id="email">
+  <input type="password" id="password">
+  <select id="type">
+    <option value="Drone">Drone</option>
+    <option value="Pod">Pod</option>
+  </select>
+  <input type="submit" value="Register">
+</form>
+</template>
+
+<template name="login">
+<form>
+  <input type="text" id="login_email">
+  <input type="password" id="login_password">
+  <input type="submit" value="login">
+</form>
+</template>
+
+<template name="dashboard">
+  <p>Welcome!{{currentUser.profile.username}}</p>
+  <a href="#" class="logout">Logout</a>
+  <button class="add">Add {{currentUser.profile.type}}</button> 
+  <div id="addthing" style="display:none;">
+    {{> addthing}}
+  </div>
+</template>
+
+<template name="addthing">
+<form>
+  <input type="name" id="name">
+  <input type="key" id="key">
+  <input type="submit" value="Add">
+</form>
+</template>

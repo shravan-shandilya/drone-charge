@@ -1,3 +1,7 @@
+import { Drones } from "../api/cust_collection.js";
+import { Pods } from "../api/cust_collection.js";
+
+
 Template.register.events({
 	"submit form":function(event,template){
 		event.preventDefault();
@@ -44,6 +48,37 @@ Template.addthing.events({
 		event.preventDefault();
 		var namething = template.find("#name").value;
 		var keything = template.find("#key").value;
-		console.log("adding thing");
+		var user = Meteor.user();
+		if(user['profile']['type'] == "Drone"){
+			var Things = Drones;
+		}
+		else if(user['profile']['type'] == "Pod"){
+			var Things = Pods;
+		}
+		//console.log("adding thing");
+		//console.log(Things.find().fetch()[0]['user']);
+		console.log(Things.find(user._id).fetch()[0]);
+		if(!Things.find(user._id).fetch()[0]){
+			console.log("New user");
+				Things.insert({
+				_id: user._id,
+				data:[{
+					namething: namething,
+					keything: keything
+				},]
+			});
+		}else{
+			console.log("New thing for the old user");
+			Things.update(
+				{"_id":user._id},
+				{ "$addToSet":{ data:{
+						namething:namething,
+						keything:keything
+						}
+					}
+				}
+			);
+			console.log(Things.find(user._id).fetch()[0]);
+		}
 	}
 });

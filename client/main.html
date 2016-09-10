@@ -36,15 +36,32 @@
   <p>Welcome!{{currentUser.profile.username}}</p>
   <a href="#" class="logout">Logout</a>
   <button class="add">Add {{currentUser.profile.type}}</button> 
-  <div id="addthing" style="display:none;">
     {{> addthing}}
-  </div>
+    {{> table}}
 </template>
 
 <template name="addthing">
-<form>
-  <input type="name" id="name">
-  <input type="key" id="key">
-  <input type="submit" value="Add">
-</form>
+<div id="addthing" style="display:none;">
+  <form>
+    <input type="name" id="name">
+    <input type="key" id="key">
+    <input type="submit" value="Add">
+  </form>
+</div>
+</template>
+
+<template name="table">
+<!--{{vals}}-->
+  {{#if vals.data}}
+    <tr>
+      <th>{{vals.col_name2}}</th>
+      <th>{{vals.col_name3}}</th>
+    </tr> 
+    {{#each val in vals.data}}
+      <tr>
+        <th>{{val.namething}}</th>
+        <th>{{val.keything}}</th>
+      </tr>
+    {{/each}}
+  {{/if}}
 </template>

@@ -3,65 +3,94 @@
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
   {{#if currentUser}}
-    {{> dashboard}}
+  {{> dashboard}}
   {{else}}
-    {{> register}}
-    {{> login}}
+  <div class="container">
+    <div class="page-header">
+      <h2>drone-charge</h2>
+    </div>
+    <div class="row">
+      <ul class="nav nav-tabs \">
+        <li class="nav-item">
+          <a href="#register" class="nav-link active" role="tab" data-toggle="tab">Register</a>
+        </li>   
+        <li class="nav-item">
+          <a href="#login" lass="nav-link" role="tab" data-toggle="tab">Login</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="register">
+        {{> register}}
+      </div>
+      <div role="tabpanel" class="tab-pane " id="login">
+        {{> login}}
+      </div>
+    </div>
+  </div>
   {{/if}}
 </body>
 
 <template name="register">
-<form>
-  <input type="text" id="email">
-  <input type="password" id="password">
-  <select id="type">
-    <option value="Drone">Drone</option>
-    <option value="Pod">Pod</option>
-  </select>
-  <input type="submit" value="Register">
-</form>
+  <form class="register">
+    <p><input type="text" placeholder="email" id="email"></p>
+    <p><input type="password" placeholder="password" id="password"></p>
+    <div class="form-group">
+      <select class="form-control" id="type">
+        <option value="Drone">Drone</option>
+        <option value="Pod">Pod</option>
+      </select>
+    </div>
+    <input type="submit" class="btn btn-default" value="Register">
+  </form>
 </template>
 
 <template name="login">
-<form>
-  <input type="text" id="login_email">
-  <input type="password" id="login_password">
-  <input type="submit" value="login">
-</form>
+  <form class="login">
+    <p><input type="text" placeholder="email" id="login_email"></p>
+    <p><input type="password" placeholder="password" id="login_password"></p>
+    <p><input type="submit" class="btn btn-default" value="login"></p>
+  </form>
 </template>
 
 <template name="dashboard">
   <p>Welcome!{{currentUser.profile.username}}</p>
   <a href="#" class="logout">Logout</a>
   <button class="add">Add {{currentUser.profile.type}}</button> 
-    {{> addthing}}
-    {{> table}}
+  {{> addthing}}
+  {{> table}}
 </template>
 
 <template name="addthing">
-<div id="addthing" style="display:none;">
-  <form>
-    <input type="name" id="name">
-    <input type="key" id="key">
-    <input type="submit" value="Add">
-  </form>
-</div>
+  <div id="addthing" style="display:none;">
+    <form>
+      <input type="name" id="name">
+      <input type="key" id="key">
+      <input type="submit" value="Add">
+    </form>
+  </div>
 </template>
 
 <template name="table">
-<!--{{vals}}-->
   {{#if vals.data}}
-    <tr>
-      <th>{{vals.col_name2}}</th>
-      <th>{{vals.col_name3}}</th>
-    </tr> 
-    {{#each val in vals.data}}
+  <table class="table">
+    <thead class="thead-inverse">
+      <tr>
+        <th>{{vals.col_name2}}</th>
+        <th>{{vals.col_name3}}</th>
+      </tr>
+    </thead>
+    <tbody> 
+      {{#each val in vals.data}}
       <tr>
         <th>{{val.namething}}</th>
         <th>{{val.keything}}</th>
       </tr>
-    {{/each}}
+      {{/each}}
+    </tbody>
+  </table>
   {{/if}}
+  
 </template>

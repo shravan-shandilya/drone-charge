@@ -26,7 +26,13 @@ Template.register.events({
 			profile: {
 				username: username,
 				type: typeVar
-			},
+			}
+		},
+		function(error){
+			template.find("#alert").style.display = "block";
+			template.find("#alert").className = "alert alert-danger";
+			template.find("#alert").innerHTML = "Registration failed!";
+			//console.log(error.reason);
 		});
 	}
 });
@@ -37,7 +43,12 @@ Template.login.events({
 		var emailVar = template.find("#login_email").value;
 		var passVar = template.find("#login_password").value;
 		console.log("Form submitted!");
-		Meteor.loginWithPassword(emailVar,passVar);
+		Meteor.loginWithPassword(emailVar,passVar,function(error){
+			template.find("#alert").style.display = "block";
+			template.find("#alert").className = "alert alert-danger";
+			template.find("#alert").innerHTML = "Snap..Login failed!";
+			//console.log(error.reason);
+		});
 	}
 });
 
@@ -49,7 +60,6 @@ Template.dashboard.events({
 	"click .add":function(event,template){
 		event.preventDefault();
 		console.log("adding");
-		template.find("#addthing").style.display = "block";
 	}
 });
 
@@ -67,10 +77,10 @@ Template.addthing.events({
 		}
 		//console.log("adding thing");
 		//console.log(Things.find().fetch()[0]['user']);
-		console.log(Things.find(user._id).fetch()[0]);
+		//console.log(Things.find(user._id).fetch()[0]);
 		if(!Things.find(user._id).fetch()[0]){
 			console.log("New user");
-				Things.insert({
+			Things.insert({
 				_id: user._id,
 				data:[{
 					namething: namething,
@@ -82,25 +92,30 @@ Template.addthing.events({
 			Things.update(
 				{"_id":user._id},
 				{ "$addToSet":{ data:{
-						namething:namething,
-						keything:keything
-						}
-					}
+					namething:namething,
+					keything:keything
 				}
-			);
-			console.log(Things.find(user._id).fetch()[0]);
+			}
 		}
-		console.log(template);
-		template.find("#addthing").style.display = "none";
+		);
+			//console.log(Things.find(user._id).fetch()[0]);
+		}
+		//console.log(template);
+		template.find("#alert").style.display = "block";
+		//console.log(template.find("#alert"));
 		table_dependents.changed();
 	}
 });
 
 Template.table.helpers({
-	vals: function(){
+	vals: function(template){
 		table_dependents.depend();
 		var things = getThings(Meteor.user());
-		console.log(things.find(Meteor.userId()).fetch()[0]['data']);
+		//console.log(things.find(Meteor.userId()).fetch()[0]['data']);
+		if(things.find(Meteor.userId()).fetch()[0]['data'].length === 0){
+			//document.getElementById("alert_table");
+		}
+		//console.log(template.find("#alert_table"));
 		var temp = {
 			col_name1: "column1",
 			col_name2: "column2",

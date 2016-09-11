@@ -56,15 +56,47 @@
 </template>
 
 <template name="dashboard">
-  <p>Welcome!{{currentUser.profile.username}}</p>
+<!--  <p>Welcome!{{currentUser.profile.username}}</p>
   <a href="#" class="logout">Logout</a>
   <button class="add">Add {{currentUser.profile.type}}</button> 
   {{> addthing}}
   {{> table}}
+-->
+<div class="container">
+  <div class="row">
+    <ul class="nav nav-tabs \">
+      <li class="nav-item">
+        <a href="#addthing" class="nav-link active" role="tab" data-toggle="tab">Add</a>
+      </li>
+      <li class="nav-item">
+        <a href="#table" class="nav-link active" role="tab" data-toggle="tab">{{currentUser.profile.type}}s</a>
+      </li>   
+      <li class="nav-item">
+        <a href="#map" lass="nav-link" role="tab" data-toggle="tab">Map</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="logout">Logout</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="addthing">
+      {{> addthing}}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="table">
+      {{> table}}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="map">
+      {{> map}}
+    </div>
+  </div>
+</div>
+
 </template>
 
 <template name="addthing">
-  <div id="addthing" style="display:none;">
+  <div id="addthing">
     <form>
       <input type="name" id="name">
       <input type="key" id="key">
@@ -74,23 +106,28 @@
 </template>
 
 <template name="table">
-  {{#if vals.data}}
-  <table class="table">
-    <thead class="thead-inverse">
-      <tr>
-        <th>{{vals.col_name2}}</th>
-        <th>{{vals.col_name3}}</th>
-      </tr>
-    </thead>
-    <tbody> 
-      {{#each val in vals.data}}
-      <tr>
-        <th>{{val.namething}}</th>
-        <th>{{val.keything}}</th>
-      </tr>
-      {{/each}}
-    </tbody>
-  </table>
-  {{/if}}
-  
+  <div class="container">
+    {{#if vals.data}}
+    <table class="table table-striped">
+      <thead class="thead-inverse">
+        <tr>
+          <th>{{vals.col_name2}}</th>
+          <th>{{vals.col_name3}}</th>
+        </tr>
+      </thead>
+      <tbody> 
+        {{#each val in vals.data}}
+        <tr>
+          <td>{{val.namething}}</td>
+          <td>{{val.keything}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{/if}}
+  </div>
+</template>
+
+<template name="map">
+Not implemented
 </template>

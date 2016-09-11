@@ -108,31 +108,37 @@
 
 <template name="table">
   <div class="container">
-  <div id="alert_table" class="alert alert-success" 
-      style="display:none;" role="alert">
+    <div id="alert_table" class="alert alert-success" 
+    style="display:none;" role="alert">
     Added entry.Check in {{currentUser.profile.type}}s 
   </div>
-    {{#if vals.data}}
-    <table class="table table-striped">
-      <thead class="thead-inverse">
-        <tr>
-          <th>{{vals.col_name2}}</th>
-          <th>{{vals.col_name3}}</th>
-        </tr>
-      </thead>
-      <tbody> 
-        {{#each val in vals.data}}
-        <tr>
-          <td>{{val.namething}}</td>
-          <td>{{val.keything}}</td>
-        </tr>
-        {{/each}}
-      </tbody>
-    </table>
-    {{/if}}
-  </div>
+  {{#if vals.data}}
+  <table class="table table-striped">
+    <thead class="thead-inverse">
+      <tr>
+        <th>{{vals.col_name2}}</th>
+        <th>{{vals.col_name3}}</th>
+      </tr>
+    </thead>
+    <tbody> 
+      {{#each val in vals.data}}
+      <tr>
+        <td>{{val.namething}}</td>
+        <td>{{val.keything}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{/if}}
+</div>
 </template>
 
-<template name="map">
-  Not implemented
-</template>
+<template name="map">  
+  <div class="map-container">
+    {{#unless geolocationError}}
+      {{> googleMap name="map" options=mapOptions}}
+    {{else}}
+      Geolocation failed: {{geolocationError}}
+    {{/unless}}
+  </div>
+</template>  

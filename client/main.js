@@ -3,6 +3,14 @@ import { Pods } from "../api/cust_collection.js";
 
 var table_dependents = new Deps.Dependency;
 
+var MAP_ZOOM = 15;
+
+Meteor.startup(function() {  
+  GoogleMaps.load({
+  	key: "AIzaSyBV9IdofwmFnGWT-hXUp5H3WUpe89PHrLw"
+  });
+});
+
 function getThings(user){
 	if(user['profile']['type'] == "Drone"){
 		return Drones;
@@ -124,4 +132,32 @@ Template.table.helpers({
 		}
 		return temp;
 	}
+});
+
+Template.map.helpers({  
+  geolocationError: function() {
+    var error = Geolocation.error();
+    return error && error.message;
+  },
+  mapOptions: function() {
+    var latLng = Geolocation.latLng();
+    // Initialize the map once we have the latLng.
+    if (GoogleMaps.loaded() && latLng) {
+      return {
+        center: new google.maps.LatLng(latLng.lat, latLng.lng),
+        zoom: MAP_ZOOM
+      };
+    }
+  }
+});
+
+Template.map.onCreated(function() {  
+  GoogleMaps.ready('map', function(map) {
+    var latLng = Geolocation.latLng();
+
+    var marker = new google.maps.Marker({
+      position: new google.maps.LatLng(latLng.lat, latLng.lng),
+      map: map.instance
+    });
+  });
 });

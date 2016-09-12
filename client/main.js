@@ -112,6 +112,11 @@ Template.addthing.events({
 		template.find("#alert").style.display = "block";
 		//console.log(template.find("#alert"));
 		table_dependents.changed();
+	},
+	"click #picklocation":function(event,template){
+		event.preventDefault();
+		console.log("Picking Location");
+		$("#location_picker").modal('show');
 	}
 });
 
@@ -160,4 +165,11 @@ Template.map.onCreated(function() {
       map: map.instance
     });
   });
+});
+
+
+Template.location_picker_template.events({
+	"click #save":function(events,template){
+		console.log("saving location");
+	}
 });

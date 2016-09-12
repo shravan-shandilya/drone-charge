@@ -103,6 +103,8 @@
       <input type="key" id="key">
       <input type="submit" value="Add">
     </form>
+    <button id="picklocation">Pick Location</button>
+    {{> location_picker_template}}
   </div>
 </template>
 
@@ -142,3 +144,26 @@
     {{/unless}}
   </div>
 </template>  
+
+<template name="location_picker_template">
+  <div class="modal fade" id="location_picker">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Pick location</h4>
+          <input id="geocomplete" type="text" placeholder="Type in an address" />
+        </div>
+
+        <div class="modal-body">
+          {{> map}}
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="save">Save</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</template>

@@ -4,13 +4,13 @@ import { Pods } from "../api/cust_collection.js";
 var table_dependents = new Deps.Dependency;
 
 var MAP_ZOOM = 15;
-
+/*
 Meteor.startup(function() {  
-  GoogleMaps.load({
-  	key: "AIzaSyBV9IdofwmFnGWT-hXUp5H3WUpe89PHrLw"
-  });
+	GoogleMaps.load({
+		key: "AIzaSyBV9IdofwmFnGWT-hXUp5H3WUpe89PHrLw"
+	});
 });
-
+*/
 function getThings(user){
 	if(user['profile']['type'] == "Drone"){
 		return Drones;
@@ -138,38 +138,57 @@ Template.table.helpers({
 		return temp;
 	}
 });
-
+/*
 Template.map.helpers({  
-  geolocationError: function() {
-    var error = Geolocation.error();
-    return error && error.message;
-  },
-  mapOptions: function() {
-    var latLng = Geolocation.latLng();
+	geolocationError: function() {
+		var error = Geolocation.error();
+		return error && error.message;
+	},
+	mapOptions: function() {
+		var latLng = Geolocation.latLng();
     // Initialize the map once we have the latLng.
     if (GoogleMaps.loaded() && latLng) {
-      return {
-        center: new google.maps.LatLng(latLng.lat, latLng.lng),
-        zoom: MAP_ZOOM
-      };
+    	return {
+    		center: new google.maps.LatLng(latLng.lat, latLng.lng),
+    		zoom: MAP_ZOOM
+    	};
     }
-  }
+}
 });
 
 Template.map.onCreated(function() {  
-  GoogleMaps.ready('map', function(map) {
-    var latLng = Geolocation.latLng();
+	GoogleMaps.ready('map', function(map) {
+		var latLng = Geolocation.latLng();
 
-    var marker = new google.maps.Marker({
-      position: new google.maps.LatLng(latLng.lat, latLng.lng),
-      map: map.instance
-    });
-  });
+		var marker = new google.maps.Marker({
+			position: new google.maps.LatLng(latLng.lat, latLng.lng),
+			map: map.instance
+		});
+	});
 });
-
-
+*/
 Template.location_picker_template.events({
 	"click #save":function(events,template){
 		console.log("saving location");
 	}
+});
+
+
+Template.location_picker_template.onRendered(function(){
+	var mapDiv = document.getElementById('map_canvas');
+	var map = new google.maps.Map(mapDiv, {
+		center: {lat: 44.540, lng: -78.546},
+		zoom: 8
+	});
+	google.maps.event.addListener(map,'click',function(event) {
+
+		marker = new google.maps.Marker({
+			position: event.latLng,
+			map: map,
+			title: 'Click Generated Marker',
+			draggable:true
+		});
+	}
+	);
+	
 });

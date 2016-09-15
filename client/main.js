@@ -76,6 +76,8 @@ Template.addthing.events({
 		event.preventDefault();
 		var namething = template.find("#name").value;
 		var keything = template.find("#key").value;
+		var lat = template.find("#latitude_addthing").value;
+		var lng = template.find("#longitude_addthing").value;
 		var user = Meteor.user();
 		if(user['profile']['type'] == "Drone"){
 			var Things = Drones;
@@ -92,7 +94,9 @@ Template.addthing.events({
 				_id: user._id,
 				data:[{
 					namething: namething,
-					keything: keything
+					keything: keything,
+					lat:lat,
+					lng:lng
 				},]
 			});
 		}else{
@@ -101,7 +105,9 @@ Template.addthing.events({
 				{"_id":user._id},
 				{ "$addToSet":{ data:{
 					namething:namething,
-					keything:keything
+					keything:keything,
+					lat:lat,
+					lng:lng
 				}
 			}
 		}
@@ -129,9 +135,10 @@ Template.table.helpers({
 		}
 		//console.log(template.find("#alert_table"));
 		var temp = {
-			col_name1: "column1",
-			col_name2: "column2",
-			col_name3: "column3",
+			col_name1: "Name",
+			col_name2: "Something",
+			col_name3: "Latitude",
+			col_name4: "longitude",
 			data: things.find(Meteor.userId()).fetch()[0]['data'].length > 0 ? things.find(Meteor.userId()).fetch()[0]['data']:undefined
 		}
 		return temp;
@@ -151,30 +158,28 @@ Template.location_picker_template.events({
 Template.location_picker_template.onRendered(function(){
 	var mapDiv = document.getElementById('map_pick_location');
 	var markers = [];
-	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(function(position) {
-			document.getElementById('latitude').innerHTML = position.coords.latitude;
-			document.getElementById('longitude').innerHTML = position.coords.longitude;
-		}, function() {
-			console.log("Couldnot get geolocation!",error.reason);
-		});
-	} else {
-		console.log("browser doesnot support geolocation");
-	}
-	/*
-	var lat = parseFloat(document.getElementById('latitude').innerHTML);
-	var lon = parseFloat(document.getElementById('longitude').innerHTML);
 
-	var test = new google.maps.LatLng(lat,lon);
-	*/
 	var test = new google.maps.LatLng(12.9189066,77.6478741);
 	var map = new google.maps.Map(mapDiv, {
 		center: test,
 		zoom: MAP_ZOOM
 	});
-
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(function(position) {
+			document.getElementById('latitude').innerHTML = position.coords.latitude;
+			document.getElementById('longitude').innerHTML = position.coords.longitude;
+			map.setCenter(new google.maps.LatLng(position.coords.latitude,position.coords.longitude));
+		}, function() {
+			console.log("Couldnot get geolocation!",error.reason);
+		});
+		//map.setCenter(new google.maps.LatLng(position.coords.latitude,position.coords.longitude));
+	} else {
+		console.log("browser doesnot support geolocation");
+	}
+	
 	google.maps.event.addListener(map,'click',function(event) {
 		if(markers.length == 0){
+			console.log("creating marker");
 			marker = new google.maps.Marker({
 				position: event.latLng,
 				map: map,
@@ -184,29 +189,35 @@ Template.location_picker_template.onRendered(function(){
 			google.maps.event.addListener(marker,'dragend',function(event){
 				document.getElementById('latitude').innerHTML = event.latLng.lat();
 				document.getElementById('longitude').innerHTML = event.latLng.lng();
+				document.getElementById('latitude_addthing').value = event.latLng.lat();
+				document.getElementById('longitude_addthing').value = event.latLng.lng();
 			});
-			console.log(event.latLng.lat(),":",event.latLng.lng());
+			//console.log(event.latLng.lat(),":",event.latLng.lng());
 			markers.push(marker);
 			document.getElementById('latitude').innerHTML = event.latLng.lat();
 			document.getElementById('longitude').innerHTML = event.latLng.lng();
+			document.getElementById('latitude_addthing').value = event.latLng.lat();
+			document.getElementById('longitude_addthing').value = event.latLng.lng();
 		}
-	}
-	);
+		console.log("inside listenet");
+	});
 
 });
 
 Template.map.onRendered(function(){
+	table_dependents.depend();
 	var map = document.getElementById('map_dashboard');
 	console.log("map rendered");
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(function(position) {
 			document.getElementById('latitude').innerHTML = position.coords.latitude;
 			document.getElementById('longitude').innerHTML = position.coords.longitude;
+			map.setCenter(new google.maps.LatLng(position.coords.latitude,position.coords.longitude));
 		}, function() {
 			console.log("Couldnot get geolocation!");
 		});
 	} else {
-		console.log("browser doesnot support geolocation");
+		console.log("browser doesnot support geolocation");n
 	}
 	/*
 	console.log(new google.maps.LatLng(parseFloat(document.getElementById('latitude').innerHTML),parseFloat(document.getElementById('longitude').innerHTML)));
@@ -220,4 +231,17 @@ Template.map.onRendered(function(){
 		center: test,
 		zoom: MAP_ZOOM
 	});
+	
+	things = getThings(Meteor.user()).find(Meteor.userId()).fetch()[0]['data'];
+	markers = [];
+	var index;
+	for(index = 0;index < things.length;index++){
+		thing = things[index];
+		marker = new google.maps.Marker({
+			position:{lat:parseFloat(thing['lat']),lng:parseFloat(thing['lng'])},
+			map:map,
+			title:thing['namething']
+		});
+		markers.push(marker);
+	}
 });

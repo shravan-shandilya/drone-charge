@@ -1,5 +1,8 @@
 <head>
   <title>drone-charge</title>
+  <script async defer 
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS6x6zKEwg8kXG0Y8rq_-DbXGu0_H7yos"
+  type="text/javascript"></script>
 </head>
 
 <body>
@@ -136,12 +139,7 @@
 </template>
 
 <template name="map">  
-  <div class="map-container">
-    {{#unless geolocationError}}
-      {{> googleMap name="map" options=mapOptions}}
-    {{else}}
-      Geolocation failed: {{geolocationError}}
-    {{/unless}}
+  <div class="map-dashboard" id="map_dashboard">
   </div>
 </template>  
 
@@ -152,15 +150,19 @@
         <div class="modal-header">
           <h4 class="modal-title">Pick location</h4>
           <input id="geocomplete" type="text" placeholder="Type in an address" />
+          <div>
+            Lattitude: <span id="latitude"></span> Longitude: <span id="longitude"></span>
+          </div>
         </div>
 
         <div class="modal-body">
-          {{> map}}
+          <div class="map-pick-location" id="map_pick_location">
+          </div>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" id="save">Save</button>
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         </div>
 
       </div>

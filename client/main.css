@@ -1,6 +1,12 @@
 /* CSS declarations go here */
-.map-container {
+.map-dashboard {
   width: 1200px;
+  max-width: 100%;
+  height: 400px;
+}
+
+.map-pick-location {
+  width: 800px;
   max-width: 100%;
   height: 400px;
 }

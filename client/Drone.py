@@ -13,7 +13,7 @@ class Drone(object):
 		self.lat = lat
 		self.lng = lng
 
-		self.machine = Machine(model=self,states=Drone.states,initial="not_registered")
+		self.machine = Machine(model=self,states=Drone.states,initial="not_registered",after_state_change="update_state_change_to_web")
 
 		self.machine.add_transition(trigger="register_success",source="not_registered",dest="idle")
 		self.machine.add_transition(trigger="register_fail",source="not_registered",dest="not_registered")
@@ -62,4 +62,8 @@ class Drone(object):
 		print "charging"
 		time.sleep(2)
 		print "charging complete"
+
+
+	def update_state_change_to_web(self):
+		print "state changed"
 		

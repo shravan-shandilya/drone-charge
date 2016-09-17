@@ -25,3 +25,5 @@ ethereum:web3
 bootstrap
 mdg:geolocation
 dburles:google-maps
+alanning:roles
+nimble:restivus

@@ -28,7 +28,7 @@ Template.register.events({
 		var typeVar = template.find("#type").value;
 		var username = emailVar.substring(0,emailVar.indexOf('@'))
 		console.log("Form submitted!");
-		Accounts.createUser({
+		var id = Accounts.createUser({
 			email: emailVar,
 			password: passVar,
 			profile: {
@@ -42,8 +42,13 @@ Template.register.events({
 			template.find("#alert").innerHTML = "Registration failed!";
 			//console.log(error.reason);
 		});
+		//roles = [];
+		//roles.push(typeVar);
+		//console.log(roles);
+		//console.log(Roles.addUsersToRoles(id, roles, 'default-group'));
 	}
 });
+
 
 Template.login.events({
 	"submit form":function(event,template){

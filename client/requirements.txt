@@ -11,3 +11,15 @@ rlp==0.4.6
 six==1.10.0
 transitions==0.4.1
 web3==2.8.1
+backports.ssl-match-hostname==3.5.0.1
+certifi==2016.8.31
+ethereum-abi-utils==0.2.2
+gevent==1.1.2
+geventhttpclient==1.3.1
+greenlet==0.4.10
+pysha3==0.3
+requests==2.11.1
+rlp==0.4.6
+six==1.10.0
+transitions==0.4.1
+web3==2.8.1

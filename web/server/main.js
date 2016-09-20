@@ -22,7 +22,7 @@ Api.addRoute('register/',{authRequired:false},{
 	post: function (){
 		request = {
 			"type":this.bodyParams["type"],
-			"namething":this.bodyParams["name"],
+			"namething":this.bodyParams["namething"],
 			"something":this.bodyParams["something"],
 			"lat":this.bodyParams["lat"],
 			"lng":this.bodyParams["lng"]

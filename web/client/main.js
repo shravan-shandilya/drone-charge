@@ -1,5 +1,7 @@
 import { Drones } from "../api/cust_collection.js";
 import { Pods } from "../api/cust_collection.js";
+import { Requests } from "../api/cust_collection.js";
+
 
 var table_dependents = new Deps.Dependency;
 
@@ -127,6 +129,16 @@ Template.addthing.events({
 	"click #picklocation":function(event,template){
 		event.preventDefault();
 		$("#location_picker").modal('show');
+	},
+	"click #auto_fill":function(event,template){
+		event.preventDefault();
+		var secret = template.find("#secret_string").value;
+		request = Requests.find(secret).fetch();
+		console.log(request);
+		template.find("#name").value = request["namething"];
+		template.find("#key").value = request["something"];
+		template.find("#latitude_addthing").value = request["lat"];
+		template.find("#longitude_addthing").value = request["lng"];
 	}
 });
 

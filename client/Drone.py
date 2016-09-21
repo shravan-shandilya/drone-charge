@@ -1,11 +1,12 @@
 import logging,time,os,random,string
 from transitions import Machine
 from transitions import logger
-from web3 import Web3,RPCProvider
+from web3 import Web3,RPCProvider,IPCProvider
 
 
 class Drone(object):
 	account = None
+	web3_rpc = None
 	web3 = None
 	states= ["not_registered","not_connected","idle","negotiating","ready_to_fly","flying","charging"]
 	def __init__(self,d_id,name,dist,lat,lng):
@@ -14,10 +15,10 @@ class Drone(object):
 		self.refuel_dist = dist
 		self.lat = lat
 		self.lng = lng
-		if os.path.isFile("/home/pi/.drone/secret"):
-			temp = states[1]
+		if os.path.isfile("./.drone/secret"):
+			temp = Drone.states[1]
 		else:
-			temp = states[0]
+			temp = Drone.states[0]
 		self.machine = Machine(model=self,states=Drone.states,initial=temp,after_state_change="update_state_change_to_web")
 
 		logger.setLevel(logging.INFO)
@@ -39,7 +40,8 @@ class Drone(object):
 		self.machine.on_enter_charging("charge")
 		logger.info("Added state callbacks to machine")
 		
-		self.web3 = Web3(RPCProvider(host="localhost",port="8545"))
+		Drone.web3_rpc = Web3(RPCProvider(host="localhost",port="8545"))
+		Drone.web3 = Web3(IPCProvider(ipc_path="/home/miner/.ethereum/geth.ipc"))
 		if self.web3:
 			logger.info("created web3 endpoint")
 		else:
@@ -50,23 +52,30 @@ class Drone(object):
 	def register(self):
 		#This will create an ethereum account for itself,push the publick key to web ui via register API call
 		logger.info( "Registering")
-		temp_file = file("/home/pi/.drone/secret","w+")
+		temp_password_file = file("./.drone/secret","w+")
 		temp_password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
-		temp_file.write(temp_password)
-		temp_file.close()
-		if(web3.personal.newAccount(temp_password)):
+		temp_password_file.write(temp_password)
+		temp_password_file.close()
+		temp_account_file = file("./.drone/account","w+")
+		temp_account = Drone.web3.personal.newAccount(temp_password)
+		if(temp_account):
+			Drone.account = temp_account
 			self.register_success()
+			temp_account_file.write(temp_account)
 			logger.info("Registration success")
 		else:
 			self.register_fail()
 			logger.error("Registration failed")
+		temp_account_file.close()
 	
 	def connect(self):
 		logger.info("connecting")
-		temp_file = file("/home/pi/.drone/secret","r")
+		temp_file = file("./.drone/secret","r")
 		temp = temp_file.readline().rstrip()
 		temp_file.close()
-		if(web3.personal.unlockAccount(account,temp):
+		temp_account_file = file("./.drone/account","r")
+		Drone.account = temp_account_file.readline().rstrip()
+		if(Drone.web3.personal.unlockAccount(Drone.account,temp)):
 			self.connect_success()
 			logger.info("connect succesful")
 		else:
@@ -76,30 +85,15 @@ class Drone(object):
 	
 	def wait_for_instructions(self):
 		print "waiting for instruction"
-		time.sleep(2)
-		self.recieved_mission_details()
 	
 	def negotiate(self):
 		print "negotiating"
-		time.sleep(2)
-		print "negotiation succesful"
-		self.negotiation_succesful()
 	
 	def fly(self):
 		print "flying"
-		self.start_flight()
-		time.sleep(2)
-		self.out_of_charge()
-		time.sleep(2)
-		self.charge_complete()
-		time.sleep(2)
-		print "mission complete"
-		self.mission_complete()
 
 	def charge(self):
 		print "charging"
-		time.sleep(2)
-		print "charging complete"
 
 
 	def update_state_change_to_web(self):

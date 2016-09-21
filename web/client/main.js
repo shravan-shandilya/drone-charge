@@ -227,7 +227,7 @@ Template.map.onRendered(function(){
 	/*
 	console.log(new google.maps.LatLng(parseFloat(document.getElementById('latitude').innerHTML),parseFloat(document.getElementById('longitude').innerHTML)));
 	var lat = parseFloat(document.getElementById('latitude').innerHTML);
-	var lon = parseFloat(document.getElementById('longitude').innerHTML);
+	var lon = parseFloat(document.getElementById('longitude').innerHTML);document
 	
 	var test = new google.maps.LatLng(lat,lon);
 	*/
@@ -248,5 +248,17 @@ Template.map.onRendered(function(){
 			title:thing['namething']
 		});
 		markers.push(marker);
+	}
+
+	google.maps.event.addListener(map,'click',function(event){
+		document.activeElement.value = event.latLng.lat()+","+event.latLng.lng();
+	});
+});
+
+Template.map.helpers({
+	drones:function(){
+		temp = Drones.find(Meteor.userId()).fetch();
+		console.log(temp);
+		return temp;
 	}
 });

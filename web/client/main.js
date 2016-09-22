@@ -133,7 +133,7 @@ Template.addthing.events({
 	"click #auto_fill":function(event,template){
 		event.preventDefault();
 		var secret = template.find("#secret_string").value;
-		request = Requests.find(secret).fetch();
+		request = Requests.find(secret).fetch()[0];
 		console.log(request);
 		template.find("#name").value = request["namething"];
 		template.find("#key").value = request["something"];
@@ -257,7 +257,8 @@ Template.map.onRendered(function(){
 		marker = new google.maps.Marker({
 			position:{lat:parseFloat(thing['lat']),lng:parseFloat(thing['lng'])},
 			map:map,
-			title:thing['namething']
+			title:thing['namething'],
+			icon:"drone_icon.png"
 		});
 		markers.push(marker);
 	}
@@ -269,6 +270,7 @@ Template.map.onRendered(function(){
 
 Template.map.helpers({
 	drones:function(){
+		table_dependents.depend();
 		temp = Drones.find(Meteor.userId()).fetch();
 		console.log(temp);
 		return temp;

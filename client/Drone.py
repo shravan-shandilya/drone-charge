@@ -1,8 +1,9 @@
-import logging,time,os,random,string
+import logging,time,os,random,string,requests
 from transitions import Machine
 from transitions import logger
 from web3 import Web3,RPCProvider,IPCProvider
 
+base_url = "http://localhost:3000/api/"
 
 class Drone(object):
 	account = None
@@ -60,9 +61,21 @@ class Drone(object):
 		temp_account = Drone.web3.personal.newAccount(temp_password)
 		if(temp_account):
 			Drone.account = temp_account
-			self.register_success()
-			temp_account_file.write(temp_account)
-			logger.info("Registration success")
+			payload = { "type":"drone",
+				    "namething":self.name,
+				    "something":self.refuel_dist,
+				    "lat":self.lat,
+				    "lng":self.lng
+				  }
+			responce = requests.post(base_url+"register",json=payload)
+			if responce.json()["status"].encode('utf8') == "success":
+				self.register_success()
+				temp_account_file.write(temp_account)
+				print "secret string:",responce.json()["id"].encode('utf8')
+				logger.info("Registration success")
+			else:
+				self.register_fail()
+				logger.info("Registration failure")
 		else:
 			self.register_fail()
 			logger.error("Registration failed")

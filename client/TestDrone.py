@@ -2,14 +2,15 @@
 import random
 from Drone import Drone
 
-name = raw_input("NAme:")
-something = raw_input("somehting:")
+name = raw_input("Name:")
+something = raw_input("Refuel-dist:")
 lat= raw_input("lat:")
 lng= raw_input("long:")
 
 d = Drone(random.randint(0,9),name,something,lat,lng)
-if d.is_not_registered:
-	print d.register()
+print d.state
+if d.is_not_registered():
+	d.register()
 
-if d.is_not_connected:
-	print d.connect()
+if d.is_not_connected():
+	d.connect()

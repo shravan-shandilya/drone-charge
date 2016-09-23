@@ -1,11 +1,16 @@
 import { Drones } from "../api/cust_collection.js";
 import { Pods } from "../api/cust_collection.js";
 import { Requests } from "../api/cust_collection.js";
+import { Missions } from "../api/cust_collection.js";
 
 
 var table_dependents = new Deps.Dependency;
 
 var MAP_ZOOM = 15;
+
+var Web3 = require('web3');
+
+web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 /*
 Meteor.startup(function() {  
 	GoogleMaps.load({
@@ -274,5 +279,26 @@ Template.map.helpers({
 		temp = Drones.find(Meteor.userId()).fetch();
 		console.log(temp);
 		return temp;
+	}
+});
+
+function create_best_route(src,dst){
+	return {
+		src:"src",
+		dst:"dst",
+		pods:["test1","test2"]
+	}
+
+}
+Template.map.events({
+	"click #route":function(template,event){
+		mission_details = create_best_route("src_latlng","dst_latlng");
+		mission_id = Missions.insert({"mission":mission_details});
+		message = {
+			topic: [web3.fromAscii("mission_details")],
+			payload: web3.fromAscii(mission_id)
+		}
+		//web3.shh.post(message);
+		console.log(message);
 	}
 });

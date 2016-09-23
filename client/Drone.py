@@ -16,6 +16,7 @@ class Drone(object):
 		self.refuel_dist = dist
 		self.lat = lat
 		self.lng = lng
+		self.mission = None
 		if os.path.isfile("./.drone/secret"):
 			temp = Drone.states[1]
 		else:
@@ -54,7 +55,7 @@ class Drone(object):
 		#This will create an ethereum account for itself,push the publick key to web ui via register API call
 		logger.info( "Registering")
 		temp_password_file = file("./.drone/secret","w+")
-		temp_password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
+		temp_password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
 		temp_password_file.write(temp_password)
 		temp_password_file.close()
 		temp_account_file = file("./.drone/account","w+")
@@ -97,7 +98,18 @@ class Drone(object):
 
 	
 	def wait_for_instructions(self):
-		print "waiting for instruction"
+		fil = Drone.web3.shh.filter({"topics":[Drone.web3.fromAscii("mission_details")]})
+		print "Filter id:",fil.filter_id
+		while True:
+			temp = Drone.web3.shh.getFilterChanges(fil.filter_id)
+			print "waiting for instruction"
+			if temp:
+				print temp
+				self.mission = Drone.web3.toAscii(temp[0]["payload"])
+				print self.mission
+				self.recieved_mission_details()
+				break
+			time.sleep(5)
 	
 	def negotiate(self):
 		print "negotiating"
@@ -110,5 +122,5 @@ class Drone(object):
 
 
 	def update_state_change_to_web(self):
-		print "state changed"
+		pass
 		

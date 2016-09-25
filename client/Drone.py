@@ -23,7 +23,6 @@ class Drone(object):
 			temp = Drone.states[0]
 		self.machine = Machine(model=self,states=Drone.states,initial=temp,after_state_change="update_state_change_to_web")
 
-		logger.setLevel(logging.INFO)
 		self.machine.add_transition(trigger="register_success",source="not_registered",dest="idle")
 		self.machine.add_transition(trigger="register_fail",source="not_registered",dest="not_registered")
 		self.machine.add_transition(trigger="connect_fail",source="not_connected",dest="not_connected")
@@ -89,13 +88,16 @@ class Drone(object):
 		temp_file.close()
 		temp_account_file = file("./.drone/account","r")
 		Drone.account = temp_account_file.readline().rstrip()
-		if(Drone.web3.personal.unlockAccount(Drone.account,temp)):
-			self.connect_success()
-			logger.info("connect succesful")
-		else:
-			self.connect_fail()
-			logger.error("connect failed")
-
+		try:
+			if(Drone.web3.personal.unlockAccount(Drone.account,temp)):
+				self.connect_success()
+				logger.info("connect succesful")
+			else:
+				self.connect_fail()
+				logger.error("connect failed")
+		except:
+			logger.error("Make sure that 'geth' is running!")
+			exit(-1)
 	
 	def wait_for_instructions(self):
 		fil = Drone.web3.shh.filter({"topics":[Drone.web3.fromAscii("mission_details")]})

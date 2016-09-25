@@ -10,7 +10,7 @@ var MAP_ZOOM = 15;
 
 var Web3 = require('web3');
 
-web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+web3 = new Web3(new Web3.providers.HttpProvider("http://10.77.133.13:8545"));
 /*
 Meteor.startup(function() {  
 	GoogleMaps.load({
@@ -291,14 +291,15 @@ function create_best_route(src,dst){
 
 }
 Template.map.events({
-	"click #route":function(template,event){
+	"click #route":function(events,template){
+		events.preventDefault();
 		mission_details = create_best_route("src_latlng","dst_latlng");
-		mission_id = Missions.insert({"mission":mission_details});
+		mission_id = Missions.insert({"mission":"mission_details"});
 		message = {
-			topic: [web3.fromAscii("mission_details")],
-			payload: web3.fromAscii(mission_id)
+			topics:/*"mission_details",//*/ [web3.fromAscii("mission_details")],
+			payload:/* "payload",//*/ web3.fromAscii(mission_id),
 		}
-		//web3.shh.post(message);
-		console.log(message);
-	}
+		res = web3.shh.post(message);
+		console.log(message,res);
+	},
 });

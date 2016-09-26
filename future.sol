@@ -64,7 +64,7 @@ contract future{
         return stop_time;
     }
     
-    function pay() returns (uint){
+    function pay() onlyDrone returns (uint){
         //cost = ((time_in_mins) * rpm)/60;
         cost_of_usage = ((stop_time - start_time)*rpm)/60;
         //Assuming that the drone has 'cost_of_usage' to pay

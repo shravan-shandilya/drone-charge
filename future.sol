@@ -10,6 +10,7 @@ contract future{
     bool drone_agreed;
     bool pod_agreed;
     bool agreed;
+    uint cost_of_usage;
     
     modifier onlyDrone{
         if(msg.sender != drone)
@@ -64,7 +65,11 @@ contract future{
     }
     
     function pay() returns (uint){
-        //amount = (time_in_mins) * rpm;
-        //return amount;
+        //cost = ((time_in_mins) * rpm)/60;
+        cost_of_usage = ((stop_time - start_time)*rpm)/60;
+        //Assuming that the drone has 'cost_of_usage' to pay
+        //Might move towards a deposit model
+        pod.send(cost_of_usage);
+        return cost_of_usage;
     } 
 }

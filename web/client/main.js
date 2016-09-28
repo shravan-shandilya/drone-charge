@@ -1,5 +1,6 @@
 import { Drones } from "../api/cust_collection.js";
 import { Pods } from "../api/cust_collection.js";
+import { Warehouses } from "../api/cust_collection.js";
 import { Requests } from "../api/cust_collection.js";
 import { Missions } from "../api/cust_collection.js";
 
@@ -90,12 +91,16 @@ Template.addthing.events({
 		var keything = template.find("#key").value;
 		var lat = template.find("#latitude_addthing").value;
 		var lng = template.find("#longitude_addthing").value;
+		var type = template.find("#type").value;
 		var user = Meteor.user();
-		if(user['profile']['type'] == "Drone"){
+		if(type == "Drone"){
 			var Things = Drones;
 		}
-		else if(user['profile']['type'] == "Pod"){
+		else if(type == "Pod"){
 			var Things = Pods;
+		}
+		else if(type == "Warehouse"){
+			var Things = Warehouses;
 		}
 		//console.log("adding thing");
 		//console.log(Things.find().fetch()[0]['user']);
@@ -226,6 +231,21 @@ Template.location_picker_template.onRendered(function(){
 
 });
 
+Template.map.helpers({
+	"drones":function(template){
+		return Drones.find(Meteor.userId()).fetch()[0]["data"];
+	},
+	"pods":function(template){
+		console.log(Pods.find().fetch()[0]["data"]);
+		return Pods.find().fetch()[0]["data"];
+	},
+	"warehouses":function(template){
+		return Warehouses.find(Meteor.userId()).fetch()[0]["data"];
+		//return [];
+	}
+
+});
+
 Template.map.onRendered(function(){
 	table_dependents.depend();
 	var map = document.getElementById('map_dashboard');
@@ -254,18 +274,48 @@ Template.map.onRendered(function(){
 		zoom: MAP_ZOOM
 	});
 	
-	things = getThings(Meteor.user()).find(Meteor.userId()).fetch()[0]['data'];
-	markers = [];
+	markers_drones = [];
+	temps = Drones.find(Meteor.userId()).fetch()[0]['data'];
 	var index;
-	for(index = 0;index < things.length;index++){
-		thing = things[index];
+	for(index = 0;index < temps.length;index++){
+		temp = temps[index];
 		marker = new google.maps.Marker({
-			position:{lat:parseFloat(thing['lat']),lng:parseFloat(thing['lng'])},
+			position:{lat:parseFloat(temp['lat']),lng:parseFloat(temp['lng'])},
 			map:map,
-			title:thing['namething'],
-			icon:"drone_icon.png"
+			title:temp['namething'],
+			icon:"drone.png"
 		});
-		markers.push(marker);
+		markers_drones.push(marker);
+	}
+
+
+	markers_pods = [];
+	temps = [];
+	temps = Pods.find().fetch()[0]["data"];
+	for(index = 0;index<temps.length;index++){
+		temp = temps[index];
+		marker = new google.maps.Marker({
+			position:{lat:parseFloat(temp['lat']),lng:parseFloat(temp['lng'])},
+			map:map,
+			title:temp['keything'],
+			icon:"plug.png"
+		});
+		markers_pods.push(marker);
+
+	}
+
+	markers_warehouses = [];
+	temps = [];
+	temps = Warehouses.find(Meteor.userId()).fetch()[0]["data"];
+	for(index = 0;index<temps.length;index++){
+		temp = temps[index];
+		marker = new google.maps.Marker({
+			position:{lat:parseFloat(temp['lat']),lng:parseFloat(temp['lng'])},
+			map:map,
+			title:temp['namething'],
+			icon:"warehouse.png"
+		});
+		markers_warehouses.push(marker);
 	}
 
 	google.maps.event.addListener(map,'click',function(event){
@@ -273,14 +323,6 @@ Template.map.onRendered(function(){
 	});
 });
 
-Template.map.helpers({
-	drones:function(){
-		table_dependents.depend();
-		temp = Drones.find(Meteor.userId()).fetch();
-		console.log(temp);
-		return temp;
-	}
-});
 
 function create_best_route(src,dst){
 	return {
@@ -293,13 +335,28 @@ function create_best_route(src,dst){
 Template.map.events({
 	"click #route":function(events,template){
 		events.preventDefault();
+		var start = template.find("#start").value;
+		var charge = template.find("#charge").value.split("(")[0];
+		var stop = template.find("#stop").value;
+
+		var start_option = template.find("#"+start);
+		var charge_option = template.find("#"+charge);
+		var stop_option = template.find("#"+stop);
+
+		console.log(start_option["lat"]);
+
+		
+		
+/*
 		mission_details = create_best_route("src_latlng","dst_latlng");
 		mission_id = Missions.insert({"mission":"mission_details"});
 		message = {
-			topics:/*"mission_details",//*/ [web3.fromAscii("mission_details")],
-			payload:/* "payload",//*/ web3.fromAscii(mission_id),
+			topics: [web3.fromAscii("mission_details")],
+			payload: web3.fromAscii(mission_id),
 		}
 		res = web3.shh.post(message);
 		console.log(message,res);
+*/
+
 	},
 });

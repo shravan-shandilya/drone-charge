@@ -104,6 +104,12 @@
     <form class="form-group">
       <p><input class="form-control" type="text" placeholder="secret string" id="secret_string"></p>
       <p><button id="auto_fill" class="form-control btn btn-default">Auto Fill</button></p>
+      {{#if currentUser.profile.type}}
+      <select class="form-control" id="type">
+        <option value="Drone">Drone</option>
+        <option value="Warehouse">Warehouse</option>
+      </select>
+      {{/if}}
       <p><input class="form-control" type="text" placeholder="name" id="name"></p>
       <p><input class="form-control" type="text" placeholder="somehitng" id="key"></p>
       <p><input class="form-control" type="text" placeholder="latitude" id="latitude_addthing"></p>
@@ -150,17 +156,29 @@
 <template name="map">
   <form>
     <div class="form-inline">
-      <label for="from">From</label>
-      <input type="text" class="form-control" placeholder="from" id="from">
-      <label for="to">To</label>
-      <input type="text" class="form-control" placeholder="to" id="to">
-      <input type="submit" class="form-control btn btn-default" id="route" value="Route">
-      <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-      </div>
-    </div>
-  </form>
-  <div class="map-dashboard" id="map_dashboard">
-  </div>
+
+      <select id="start">
+       {{#each drone in drones}}
+       <option address="NA" lat={{drone.lat}} lng={{drone.lng}} id={{drone.namething}}>{{drone.namething}}</option>
+       {{/each}}
+     </select>        
+
+     <select  id="charge"> 
+       {{#each pod in pods}}
+       <option address="NA" lat={{pod.lat}} lng={{pod.lng}} id={{pod.namething}}>{{pod.namething}}({{pod.keything}})</option>
+       {{/each}}
+     </select>
+
+     <select  id="stop"> 
+       {{#each warehouse in warehouses}}
+       <option address="NA" lat={{warehouse.lat}} lng={{warehouse.lng}} id={{warehouse.namething}}>{{warehouse.namething}}</option>
+       {{/each}}
+     </select>
+     <input type="submit" class="form-control btn btn-default" id="route" value="Route">
+   </div> 
+ </form>
+ <div class="map-dashboard" id="map_dashboard">
+ </div>
 </template>  
 
 <template name="location_picker_template">

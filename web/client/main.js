@@ -1,5 +1,4 @@
-import { Drones } from "../api/cust_collection.js";
-import { Pods } from "../api/cust_collection.js";
+import { Drones } from "../api/cust_collection.js"; import { Pods } from "../api/cust_collection.js";
 import { Warehouses } from "../api/cust_collection.js";
 import { Requests } from "../api/cust_collection.js";
 import { Missions } from "../api/cust_collection.js";
@@ -8,7 +7,7 @@ import { Missions } from "../api/cust_collection.js";
 var table_dependents = new Deps.Dependency;
 
 var MAP_ZOOM = 15;
-
+var map;
 var Web3 = require('web3');
 
 web3 = new Web3(new Web3.providers.HttpProvider("http://10.77.133.13:8545"));
@@ -248,7 +247,7 @@ Template.map.helpers({
 
 Template.map.onRendered(function(){
 	table_dependents.depend();
-	var map = document.getElementById('map_dashboard');
+	mapDIV = document.getElementById('map_dashboard');
 	console.log("map rendered");
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(function(position) {
@@ -269,7 +268,7 @@ Template.map.onRendered(function(){
 	var test = new google.maps.LatLng(lat,lon);
 	*/
 	var test = new google.maps.LatLng(12.9189066,77.6478741);
-	var map = new google.maps.Map(map, {
+	map = new google.maps.Map(mapDIV, {
 		center: test,
 		zoom: MAP_ZOOM
 	});
@@ -343,7 +342,7 @@ Template.map.events({
 		var charge_option = template.find("#"+charge);
 		var stop_option = template.find("#"+stop);
 
-		console.log(start_option["lat"]);
+		console.log(start_option.getAttribute("lat"));
 
 		
 		
@@ -358,5 +357,29 @@ Template.map.events({
 		console.log(message,res);
 */
 
+	},
+	"click #plan":function(events,template){
+		events.preventDefault();
+		var start = template.find("#start").value;
+		var charge = template.find("#charge").value.split("(")[0];
+		var stop = template.find("#stop").value;
+
+		var start_option = template.find("#"+start);
+		var charge_option = template.find("#"+charge);
+		var stop_option = template.find("#"+stop);
+
+		var planPath = [
+		new google.maps.LatLng(parseFloat(start_option.getAttribute("lat")), parseFloat(start_option.getAttribute("lng"))),
+		new google.maps.LatLng(parseFloat(charge_option.getAttribute("lat")),parseFloat(charge_option.getAttribute("lng"))),
+		new google.maps.LatLng(parseFloat(stop_option.getAttribute("lat")), parseFloat(stop_option.getAttribute("lng"))),
+		];
+	
+		console.log(planPath);	
+		var planPathMap = new google.maps.Polyline({
+			path:planPath,
+			strokeColor: "#FF0000",
+			strokeWeight: 2,
+		});
+		planPathMap.setMap(map);
 	},
 });

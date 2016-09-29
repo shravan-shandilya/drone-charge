@@ -1,6 +1,6 @@
 import logging,time,os,random,string,requests
 from transitions import Machine
-from transitions import logger
+import logging
 from web3 import Web3,RPCProvider,IPCProvider
 
 base_url = "http://localhost:3000/api/"
@@ -21,6 +21,9 @@ class Drone(object):
 			temp = Drone.states[1]
 		else:
 			temp = Drone.states[0]
+
+		logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO)	 	   
+
 		self.machine = Machine(model=self,states=Drone.states,initial=temp,after_state_change="update_state_change_to_web")
 
 		self.machine.add_transition(trigger="register_success",source="not_registered",dest="idle")
@@ -34,25 +37,25 @@ class Drone(object):
 		self.machine.add_transition(trigger="out_of_charge",source="flying",dest="charging")
 		self.machine.add_transition(trigger="charge_complete",source="charging",dest="flying")
 		self.machine.add_transition(trigger="mission_complete",source="flying",dest="idle")
-		logger.info("Added transitions")
+		logging.info("Added transitions")
 
 		self.machine.on_enter_idle("wait_for_instructions")
 		self.machine.on_enter_negotiating("negotiate")
 		self.machine.on_enter_charging("charge")
-		logger.info("Added state callbacks to machine")
+		logging.info("Added state callbacks to machine")
 		
 		Drone.web3_rpc = Web3(RPCProvider(host="localhost",port="8545"))
 		Drone.web3 = Web3(IPCProvider(ipc_path="/home/miner/.ethereum/geth.ipc"))
 		if self.web3:
-			logger.info("created web3 endpoint")
+			logging.info("created web3 endpoint")
 		else:
-			logger.error("Couldnot connect tp geth over RPC")
-			logger.info("Make sure that geth is running")
+			logging.error("Couldnot connect tp geth over RPC")
+			logging.info("Make sure that geth is running")
 			exit(-1)
 
 	def register(self):
 		#This will create an ethereum account for itself,push the publick key to web ui via register API call
-		logger.info( "Registering")
+		logging.info( "Registering")
 		temp_password_file = file("./.drone/secret","w+")
 		temp_password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
 		temp_password_file.write(temp_password)
@@ -69,60 +72,57 @@ class Drone(object):
 				  }
 			responce = requests.post(base_url+"register",json=payload)
 			if responce.json()["status"].encode('utf8') == "success":
-				self.register_success()
 				temp_account_file.write(temp_account)
-				print "secret string:",responce.json()["id"].encode('utf8')
-				logger.info("Registration success")
+				logging.info("Secret string:",responce.json()["id"].encode('utf8'))
+				logging.info("Registration success")
+				self.register_success()
 			else:
+				logging.info("Registration failure")
 				self.register_fail()
-				logger.info("Registration failure")
 		else:
 			self.register_fail()
-			logger.error("Registration failed")
+			logging.error("Registration failed")
 		temp_account_file.close()
 	
 	def connect(self):
-		logger.info("connecting")
+		logging.info("connecting")
 		temp_file = file("./.drone/secret","r")
 		temp = temp_file.readline().rstrip()
 		temp_file.close()
 		temp_account_file = file("./.drone/account","r")
 		Drone.account = temp_account_file.readline().rstrip()
-		try:
-			if(Drone.web3.personal.unlockAccount(Drone.account,temp)):
-				self.connect_success()
-				logger.info("connect succesful")
-			else:
-				self.connect_fail()
-				logger.error("connect failed")
-		except:
-			logger.error("Make sure that 'geth' is running!")
-			exit(-1)
+		if(Drone.web3.personal.unlockAccount(Drone.account,temp)):
+			self.connect_success()
+			logging.info("connect succesful")
+		else:
+			self.connect_fail()
+			logging.error("connect failed")
 	
 	def wait_for_instructions(self):
 		fil = Drone.web3.shh.filter({"topics":[Drone.web3.fromAscii("mission_details")]})
-		print "Filter id:",fil.filter_id
+		logging.info("Filter id:",fil.filter_id)
 		while True:
 			temp = Drone.web3.shh.getFilterChanges(fil.filter_id)
-			print "waiting for instruction"
+			logging.info("Waiting for instruction")
 			if temp:
-				print temp
-				self.mission = Drone.web3.toAscii(temp[0]["payload"])
-				print self.mission
+				self.mission_id = Drone.web3.toAscii(temp[0]["payload"])
 				self.recieved_mission_details()
 				break
 			time.sleep(5)
 	
 	def negotiate(self):
-		print "negotiating"
+		#Create and publish contract here?
+		contract = file("../future.sol","r").read()
+		self.mission = requests.get(base_url+"mission/"+str(self.mission_id))	
+		logging.info(self.mission.json())	
 	
 	def fly(self):
-		print "flying"
+		logging.debug("flying")
 
 	def charge(self):
-		print "charging"
+		logging.debug("charging")
 
 
 	def update_state_change_to_web(self):
-		pass
+		logging.info("State changed")	
 		

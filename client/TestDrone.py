@@ -8,7 +8,6 @@ lat= raw_input("lat:")
 lng= raw_input("long:")
 
 d = Drone(random.randint(0,9),name,something,lat,lng)
-print d.state
 if d.is_not_registered():
 	d.register()
 

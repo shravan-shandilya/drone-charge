@@ -63,23 +63,24 @@ class Pod(object):
 			Pod.account = temp_account
 			payload = { "type":"pod",
 				    "namething":self.name,
-				    "something":self.refuel_dist,
+				    "something":self.rpm,
 				    "lat":self.lat,
 				    "lng":self.lng
 				  }
 			responce = requests.post(base_url+"register",json=payload)
+			print responce.json()
 			if responce.json()["status"].encode('utf8') == "success":
-				self.register_success()
 				temp_account_file.write(temp_account)
 				print "secret string:",responce.json()["id"].encode('utf8')
 				logger.info("Registration success")
+				temp_account_file.close()
+				self.register_success()
 			else:
 				self.register_fail()
 				logger.info("Registration failure")
 		else:
 			self.register_fail()
 			logger.error("Registration failed")
-		temp_account_file.close()
 	
 	def connect(self):
 		logger.info("connecting")
@@ -118,5 +119,5 @@ class Pod(object):
 
 
 	def update_state_change_to_web(self):
-		pass
+		print self.state		
 		

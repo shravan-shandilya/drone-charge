@@ -342,20 +342,35 @@ Template.map.events({
 		var charge_option = template.find("#"+charge);
 		var stop_option = template.find("#"+stop);
 
-		console.log(start_option.getAttribute("lat"));
-
-		
-		
-/*
-		mission_details = create_best_route("src_latlng","dst_latlng");
-		mission_id = Missions.insert({"mission":"mission_details"});
+	
+		mission_id = Missions.insert({data:{
+			start:{
+				address:start_option.getAttribute("address"),
+				lat:start_option.getAttribute("lat"),
+				lng:start_option.getAttribute("lng")
+			},
+			charge:[{
+				address:charge_option.getAttribute("address"),
+				lat:charge_option.getAttribute("lat"),
+				lng:charge_option.getAttribute("lng")
+			}],
+			stop:{
+				address:stop_option.getAttribute("address"),
+				lat:stop_option.getAttribute("lat"),
+				lng:stop_option.getAttribute("lng")
+			}	
+		}
+		});		
+		console.log(mission_id);
+	//	mission_details = create_best_route("src_latlng","dst_latlng");
+	//	mission_id = Missions.insert({"mission":"mission_details"});
 		message = {
 			topics: [web3.fromAscii("mission_details")],
 			payload: web3.fromAscii(mission_id),
 		}
 		res = web3.shh.post(message);
 		console.log(message,res);
-*/
+
 
 	},
 	"click #plan":function(events,template){

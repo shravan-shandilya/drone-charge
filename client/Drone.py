@@ -1,6 +1,6 @@
 import logging,time,os,random,string,requests
 from transitions import Machine
-import logging
+import logging,json
 from web3 import Web3,RPCProvider,IPCProvider
 
 base_url = "http://localhost:3000/api/"
@@ -41,6 +41,8 @@ class Drone(object):
 
 		self.machine.on_enter_idle("wait_for_instructions")
 		self.machine.on_enter_negotiating("negotiate")
+		self.machine.on_enter_ready_to_fly("countdown")
+		self.machine.on_enter_flying("fly")
 		self.machine.on_enter_charging("charge")
 		logging.info("Added state callbacks to machine")
 		
@@ -100,7 +102,6 @@ class Drone(object):
 	
 	def wait_for_instructions(self):
 		fil = Drone.web3.shh.filter({"topics":[Drone.web3.fromAscii("mission_details")]})
-		logging.info("Filter id:",fil.filter_id)
 		while True:
 			temp = Drone.web3.shh.getFilterChanges(fil.filter_id)
 			logging.info("Waiting for instruction")
@@ -112,15 +113,62 @@ class Drone(object):
 	
 	def negotiate(self):
 		#Create and publish contract here?
-		contract = file("../future.sol","r").read()
-		self.mission = requests.get(base_url+"mission/"+str(self.mission_id))	
-		logging.info(self.mission.json())	
+		source = file("../future.sol","r").read()
+		code = file("../future.bin","r").read()
+		code_runtime = file("../future.bin.runtime","r").read()
+		abi = json.loads(file("../future.abi","r").read())
+		contract_factory = Drone.web3.eth.contract(abi=abi,code=code,code_runtime=code_runtime,source=source)
+		txn = contract_factory.deploy()
+		logging.info("deploying contract")
+		while Drone.web3.eth.getTransactionReceipt(txn) == None:
+			time.sleep(2)
+		contract_address =  Drone.web3.eth.getTransactionReceipt(txn)["contractAddress"]
+		logging.info("contract deployed at "+str(contract_address))
+		contract = contract_factory(abi,address=contract_address)
+		self.mission = requests.get(base_url+"mission/"+str(self.mission_id)).json()
+		logging.info("fetching mission details")
+		charger_address = self.mission[0]["data"]["charge"][0]["address"]
+		contract.transact().setPod("0x956842425c38cbca202c4c3c3c1c074e95fe5358",25)
+		logging.info("setting charger")	
+		self.negotiation_succesful()
 	
 	def fly(self):
-		logging.debug("flying")
+		start = (float(self.mission[0]["data"]["start"]["lat"].encode("utf8")),float(self.mission[0]["data"]["start"]["lng"].encode("utf8")))
+		charge1 = (float(self.mission[0]["data"]["charge"][0]["lat"].encode("utf8")),float(self.mission[0]["data"]["charge"][0]["lng"].encode("utf8")))
+		stop = (float(self.mission[0]["data"]["stop"]["lat"].encode("utf8")),float(self.mission[0]["data"]["stop"]["lng"].encode("utf8")))
+		logging.info("start:"+str(start))
+		logging.info("charge1:"+str(charge1))
+		logging.info("stop:"+str(stop))
+		logging.info("flying")
+		
+		#simulation
+		path1 = []
+		num = 50
+		latDelta = (start[0] - charge1[0])/num
+		lngDelta = (start[1] - charge1[1])/num
+
+		for i in range(0,num):
+			if start[0] > charge1[0]:
+				new_lat = start[0]-i*latDelta
+			else:
+				new_lat = start[0]+i*latDelta
+			if start[1] > charge1[1]:
+				new_lng = start[1]+i*lngDelta
+			else:
+				new_lng = start[1]-i*lngDelta
+
+			path1.append((new_lat,new_lng))
+			logging.info("at: ("+str(new_lat)+","+str(new_lng)+")")
+			time.sleep(1)
 
 	def charge(self):
 		logging.debug("charging")
+
+	def countdown(self):
+		for i in range(0,10):
+			logging.info("Countdown: "+str(10-i))
+			time.sleep(0.5)
+		self.start_flight()
 
 
 	def update_state_change_to_web(self):

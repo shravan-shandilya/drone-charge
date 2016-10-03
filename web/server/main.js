@@ -7,7 +7,7 @@ var Api = new Restivus({
 	useDefaultAuth: true,
 	prettyJson: true
 });
-
+uptodate_gps = {};
 
 //Api.addCollection(Drones);
 //Api.addCollection(Pods);
@@ -26,13 +26,14 @@ Api.addRoute('mission/:id',{authRequired:false},{
 
 Api.addRoute("gps_update",{authRequired:false},{
 	post: function(){
-	/*	uptodate_gps = {
+	uptodate_gps = {
 			"lat":this.bodyParams["lat"],
 			"lng":this.bodyParams["lng"]
 		}
-	*/
-		uptodate_gps = "hello";
-		return {status:"success",value:uptodate_gps};
+		return {status:"success"};
+	},
+	get: function(){
+		return uptodate_gps;
 	}
 });
 

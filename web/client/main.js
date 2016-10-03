@@ -361,12 +361,11 @@ Template.map.events({
 		});		
 		console.log(start_option.value);
 	//	mission_details = create_best_route("src_latlng","dst_latlng");
-	//	mission_id = Missions.insert({"mission":"mission_details"});
 		message = {
 			topics: [web3.fromAscii("mission_details")],
 			payload: web3.fromAscii(mission_id),
 		}
-	//	res = web3.shh.post(message);
+		res = web3.shh.post(message);
 	//	console.log(message,res);
 		console.log(mission_id);
 		selected_marker = null;
@@ -386,7 +385,15 @@ Template.map.events({
 		console.log(selected_drone);
 		function updateLocation(){
 			selected_drone = null;
-			console.log(uptodate_gps);
+			HTTP.call('GET','http://10.77.133.13:3000/api/gps_update',function(error,responce){
+				console.log(responce.data);
+				if(responce.data.lat && responce.data.lng){
+					new_lat_lng = new google.maps.LatLng(parseFloat(responce.data["lat"]),parseFloat(responce.data["lng"]));
+					selected_marker.setPosition(new_lat_lng);
+					map.panTo(new_lat_lng);
+				}
+			});
+
 			setTimeout(updateLocation,3000);
 		}
 		setTimeout(updateLocation,3000);

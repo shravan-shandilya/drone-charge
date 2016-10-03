@@ -127,7 +127,7 @@ class Drone(object):
 		contract = contract_factory(abi,address=contract_address)
 		self.mission = requests.get(base_url+"mission/"+str(self.mission_id)).json()
 		logging.info("fetching mission details")
-		charger_address = self.mission[0]["data"]["charge"][0]["address"]
+		#charger_address = self.mission[0]["data"]["charge"][0]["address"]
 		contract.transact().setPod("0x956842425c38cbca202c4c3c3c1c074e95fe5358",25)
 		logging.info("setting charger")	
 		self.negotiation_succesful()

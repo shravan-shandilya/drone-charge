@@ -159,7 +159,12 @@ class Drone(object):
 
 			path1.append((new_lat,new_lng))
 			logging.info("at: ("+str(new_lat)+","+str(new_lng)+")")
-			time.sleep(1)
+			payload = { "lat":new_lat,"lng":new_lng }
+			resp = requests.post(base_url+"gps_update",json=payload)
+			print resp.json()
+			if resp.json()["status"]=="success":
+				logging.debug("Update success")
+			time.sleep(3)
 
 	def charge(self):
 		logging.debug("charging")
@@ -172,5 +177,4 @@ class Drone(object):
 
 
 	def update_state_change_to_web(self):
-		logging.info("State changed")	
-		
+		logging.info("State changed")

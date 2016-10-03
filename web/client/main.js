@@ -3,13 +3,12 @@ import { Warehouses } from "../api/cust_collection.js";
 import { Requests } from "../api/cust_collection.js";
 import { Missions } from "../api/cust_collection.js";
 
-
 var table_dependents = new Deps.Dependency;
 
 var MAP_ZOOM = 15;
 var map;
 var Web3 = require('web3');
-
+var markers_drones = [];
 web3 = new Web3(new Web3.providers.HttpProvider("http://10.77.133.13:8545"));
 /*
 Meteor.startup(function() {  
@@ -273,7 +272,6 @@ Template.map.onRendered(function(){
 		zoom: MAP_ZOOM
 	});
 	
-	markers_drones = [];
 	temps = Drones.find(Meteor.userId()).fetch()[0]['data'];
 	var index;
 	for(index = 0;index < temps.length;index++){
@@ -361,16 +359,37 @@ Template.map.events({
 			}	
 		}
 		});		
-		console.log(mission_id);
+		console.log(start_option.value);
 	//	mission_details = create_best_route("src_latlng","dst_latlng");
 	//	mission_id = Missions.insert({"mission":"mission_details"});
 		message = {
 			topics: [web3.fromAscii("mission_details")],
 			payload: web3.fromAscii(mission_id),
 		}
-		res = web3.shh.post(message);
-		console.log(message,res);
-
+	//	res = web3.shh.post(message);
+	//	console.log(message,res);
+		console.log(mission_id);
+		selected_marker = null;
+		for(i=0;i<markers_drones.length;i++){
+			if(markers_drones[i]["title"]==start_option.value){
+				selected_marker = markers_drones[i];
+			}
+		}
+		console.log(selected_marker);
+		selected_drone = null;
+		drones= Drones.find(Meteor.userId()).fetch()[0]["data"];
+		for (i=0;i<drones.length;i++){
+			if(drones[i]["namething"]==start_option.value)
+				selected_drone = drones[i];
+		}	
+		
+		console.log(selected_drone);
+		function updateLocation(){
+			selected_drone = null;
+			console.log(uptodate_gps);
+			setTimeout(updateLocation,3000);
+		}
+		setTimeout(updateLocation,3000);
 
 	},
 	"click #plan":function(events,template){

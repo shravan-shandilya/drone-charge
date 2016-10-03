@@ -3,11 +3,11 @@ import { Drones } from "../api/cust_collection.js";
 import { Pods } from "../api/cust_collection.js";
 import { Requests } from "../api/cust_collection.js";
 import { Missions } from "../api/cust_collection.js";
-
 var Api = new Restivus({
 	useDefaultAuth: true,
 	prettyJson: true
 });
+
 
 //Api.addCollection(Drones);
 //Api.addCollection(Pods);
@@ -21,6 +21,18 @@ Api.addRoute('request/:id',{authRequired:false},{
 Api.addRoute('mission/:id',{authRequired:false},{
 	get: function(){
 		return Missions.find(this.urlParams.id).fetch();
+	}
+});
+
+Api.addRoute("gps_update",{authRequired:false},{
+	post: function(){
+	/*	uptodate_gps = {
+			"lat":this.bodyParams["lat"],
+			"lng":this.bodyParams["lng"]
+		}
+	*/
+		uptodate_gps = "hello";
+		return {status:"success",value:uptodate_gps};
 	}
 });
 

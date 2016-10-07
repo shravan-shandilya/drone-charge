@@ -58,6 +58,7 @@
     <p><input type="password" placeholder="password" id="login_password"></p>
     <p><input type="submit" class="btn btn-default" value="login"></p>
   </form>
+
 </template>
 
 <template name="dashboard">
@@ -74,7 +75,10 @@
           <a href="#table" class="nav-link active" role="tab" data-toggle="tab">{{currentUser.profile.type}}s</a>
         </li>   
         <li class="nav-item">
-          <a href="#map" lass="nav-link" role="tab" data-toggle="tab">Map</a>
+          <a href="#map" class="nav-link" role="tab" data-toggle="tab">Map</a>
+        </li>
+         <li class="nav-item">
+          <a href="#account" class="nav-link" role="tab" data-toggle="tab">Account</a>
         </li>
         <li class="nav-item">
           <a href="#" class="logout">Logout</a>
@@ -83,14 +87,17 @@
     </div>
 
     <div class="tab-content">
-      <div role="tabpanel" class="tab-pane active" id="addthing">
+      <div role="tabpanel" class="tab-pane" id="addthing">
         {{> addthing}}
       </div>
       <div role="tabpanel" class="tab-pane" id="table">
         {{> table}}
       </div>
-      <div role="tabpanel" class="tab-pane" id="map">
+      <div role="tabpanel" class="tab-pane active" id="map">
         {{> map}}
+      </div>
+      <div role="tabpanel" class="tab-pane" id="account">
+        {{> account}}
       </div>
     </div>
   </div>
@@ -108,6 +115,7 @@
       <select class="form-control" id="type">
         <option value="Drone">Drone</option>
         <option value="Warehouse">Warehouse</option>
+	<option value="Pod">Pod</option>
       </select>
       {{/if}}
       <p><input class="form-control" type="text" placeholder="name" id="name"></p>
@@ -174,13 +182,31 @@
        <option address="NA" lat={{warehouse.lat}} lng={{warehouse.lng}} id={{warehouse.namething}}>{{warehouse.namething}}</option>
        {{/each}}
      </select>
-     <input  class="form-control btn btn-default" id="plan" value="Plan">
+     <input type="button" class="form-control btn btn-default" id="clear" value="Clear">
+     <input type="button" class="form-control btn btn-default" id="plan" value="Plan">
      <input type="submit" class="form-control btn btn-default" id="route" value="Route">
    </div> 
  </form>
  <div class="map-dashboard" id="map_dashboard">
  </div>
 </template>  
+
+<template name="account">
+<div>
+<!-- <select id="start">
+   {{#each drone in drones}}
+     <option >{{drone.namething}}</option>
+   {{/each}}
+ </select> 
+ <input type="button" class="form-control btn btn-default" id="get_balance" value="Get Balance">
+-->
+<form>
+      <p><input class="form-control" type="text" placeholder="transaction hash" id="txn_hash"></p>
+      <p><input type="submit" class="form-control btn bt-default" id="get_txt" value="Get Txn Receipt"></p>
+</form>
+<p id="txn_out"></p>
+</div>
+</template>
 
 <template name="location_picker_template">
   <div class="modal fade" id="location_picker">

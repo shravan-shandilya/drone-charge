@@ -1,28 +1,36 @@
-import logging,time,os,random,string,requests
 from transitions import Machine
-import logging,json
+import logging,json,os,time,requests
 from web3 import Web3,RPCProvider,IPCProvider
 
 base_url = "http://localhost:3000/api/"
 
 class Drone(object):
 	account = None
+	secret = None
 	web3_rpc = None
 	web3 = None
 	states= ["not_registered","not_connected","idle","negotiating","ready_to_fly","flying","charging"]
-	def __init__(self,d_id,name,dist,lat,lng):
-		self.drone_id = d_id
-		self.name = name
-		self.refuel_dist = dist
-		self.lat = lat
-		self.lng = lng
+	def __init__(self,d_id=None,name=None,dist=None,lat=None,lng=None):
+		self.name = file(".drone/name","r").read().rstrip()
+		self.refuel_dist = file(".drone/refuel_dist","r").read().rstrip()
+		self.lat = file(".drone/lat","r").read().rstrip()
+		self.lng = file(".drone/lng","r").read().rstrip()
 		self.mission = None
-		if os.path.isfile("./.drone/secret"):
-			temp = Drone.states[1]
+		if os.path.isfile("./.drone/account"):
+			Drone.account = file(".drone/account","r").read().rstrip()
+			if os.path.isfile("./.drone/secret"):
+				Drone.secret = file("./.drone/secret","r").read().rstrip()
+			temp = Drone.states[1]	
 		else:
 			temp = Drone.states[0]
 
 		logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO)	 	   
+		if os.path.isfile(".drone/id"):
+			self.drone_id = file(".drone/id","r").read()
+			logging.info(self.drone_id)
+		else:
+			self.drone_id = None
+
 
 		self.machine = Machine(model=self,states=Drone.states,initial=temp,after_state_change="update_state_change_to_web")
 
@@ -70,7 +78,8 @@ class Drone(object):
 				    "namething":self.name,
 				    "something":self.refuel_dist,
 				    "lat":self.lat,
-				    "lng":self.lng
+				    "lng":self.lng,
+				    "address":Drone.account
 				  }
 			responce = requests.post(base_url+"register",json=payload)
 			if responce.json()["status"].encode('utf8') == "success":
@@ -88,14 +97,25 @@ class Drone(object):
 	
 	def connect(self):
 		logging.info("connecting")
-		temp_file = file("./.drone/secret","r")
-		temp = temp_file.readline().rstrip()
-		temp_file.close()
-		temp_account_file = file("./.drone/account","r")
-		Drone.account = temp_account_file.readline().rstrip()
-		if(Drone.web3.personal.unlockAccount(Drone.account,temp)):
-			self.connect_success()
-			logging.info("connect succesful")
+		if(Drone.web3.personal.unlockAccount(Drone.account,Drone.secret,5000)):
+			if self.drone_id == None:
+				payload = {
+					"address":str(Drone.account),
+					"namething":self.name,
+					"something":self.refuel_dist,
+					"lat":self.lat,
+					"lng":self.lng
+				}
+				responce = requests.post(base_url+"register",json=payload)
+				if responce.json()["status"].encode("utf8") == "success":
+					self.drone_id = responce.json()["id"].encode("utf8")
+					file("./.drone/id","w+").write(self.drone_id)
+					logging.info("connect succesful")
+					self.connect_success()
+				else:
+					self.connect_fail()
+			else:
+				self.connect_fail()
 		else:
 			self.connect_fail()
 			logging.error("connect failed")
@@ -124,11 +144,12 @@ class Drone(object):
 			time.sleep(2)
 		contract_address =  Drone.web3.eth.getTransactionReceipt(txn)["contractAddress"]
 		logging.info("contract deployed at "+str(contract_address))
-		contract = contract_factory(abi,address=contract_address)
+		self.contract = contract_factory(abi,address=contract_address)
 		self.mission = requests.get(base_url+"mission/"+str(self.mission_id)).json()
+		print self.mission
 		logging.info("fetching mission details")
 		#charger_address = self.mission[0]["data"]["charge"][0]["address"]
-		contract.transact().setPod("0x956842425c38cbca202c4c3c3c1c074e95fe5358",25)
+		self.contract.transact().setPod("0x956842425c38cbca202c4c3c3c1c074e95fe5358",25)
 		logging.info("setting charger")	
 		self.negotiation_succesful()
 	
@@ -143,9 +164,9 @@ class Drone(object):
 		
 		#simulation
 		path1 = []
-		num = 50
-		latDelta = (start[0] - charge1[0])/num
-		lngDelta = (start[1] - charge1[1])/num
+		num = 30
+		latDelta = abs(start[0] - charge1[0])/num
+		lngDelta = abs(start[1] - charge1[1])/num
 
 		for i in range(0,num):
 			if start[0] > charge1[0]:
@@ -153,9 +174,9 @@ class Drone(object):
 			else:
 				new_lat = start[0]+i*latDelta
 			if start[1] > charge1[1]:
-				new_lng = start[1]+i*lngDelta
-			else:
 				new_lng = start[1]-i*lngDelta
+			else:
+				new_lng = start[1]+i*lngDelta
 
 			path1.append((new_lat,new_lng))
 			logging.info("at: ("+str(new_lat)+","+str(new_lng)+")")
@@ -164,11 +185,44 @@ class Drone(object):
 			print resp.json()
 			if resp.json()["status"]=="success":
 				logging.debug("Update success")
-			time.sleep(3)
+			time.sleep(2)
+		
+		self.out_of_charge()
+
+		path2 = []
+		num = 30
+		latDelta = abs(charge1[0] - stop[0])/num
+		lngDelta = abs(charge1[1] - stop[1])/num
+		for i in range(0,num):
+			if charge1[0] > stop[0]:
+				new_lat = charge1[0]-i*latDelta
+			else:
+				new_lat = charge1[0]+i*latDelta
+			if charge1[1] > stop[1]:
+				new_lng = charge1[1]-i*lngDelta
+			else:
+				new_lng = charge1[1]+i*lngDelta
+
+			path2.append((new_lat,new_lng))
+			logging.info("at: ("+str(new_lat)+","+str(new_lng)+")")
+			payload = { "lat":new_lat,"lng":new_lng }
+			resp = requests.post(base_url+"gps_update",json=payload)
+			print resp.json()
+			if resp.json()["status"]=="success":
+				logging.debug("Update success")
+			time.sleep(2)
+		self.mission_complete()
 
 	def charge(self):
 		logging.debug("charging")
-
+		receipt = self.contract.transact().start()
+		logging.info("charging started:"+str(receipt))
+		time.sleep(10)
+		receipt = self.contract.transact().stop()
+		logging.info("charging stopped:"+str(receipt))
+		receipt = self.contract.transact().pay()
+		logging.info("Total amount paid: "+str(receipt))	
+		#self.charge_complete()
 	def countdown(self):
 		for i in range(0,10):
 			logging.info("Countdown: "+str(10-i))

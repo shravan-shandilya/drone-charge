@@ -1,4 +1,5 @@
-import { Drones } from "../api/cust_collection.js"; import { Pods } from "../api/cust_collection.js";
+import { Drones } from "../api/cust_collection.js";
+import { Pods } from "../api/cust_collection.js";
 import { Warehouses } from "../api/cust_collection.js";
 import { Requests } from "../api/cust_collection.js";
 import { Missions } from "../api/cust_collection.js";
@@ -17,6 +18,23 @@ Meteor.startup(function() {
 	});
 });
 */
+
+var drone_icon = {
+	url:"drone.png",
+	anchor: new google.maps.Point(12,12)
+};
+
+var pod_icon = {
+	url:"plug.png",
+	anchor: new google.maps.Point(12,12)
+};
+
+var warehouse_icon = {
+	url:"warehouse.png",
+	anchor: new google.maps.Point(12,12)
+};
+
+
 function getThings(user){
 	if(user['profile']['type'] == "Drone"){
 		return Drones;
@@ -228,7 +246,19 @@ Template.location_picker_template.onRendered(function(){
 	});
 
 });
-
+Template.account.helpers({
+	"drones":function(template){
+		return Drones.find(Meteor.userId()).fetch()[0]["data"];
+	}
+});
+Template.account.events({
+	"submit form":function(event,template){
+		event.preventDefault();
+		var hash = template.find("#txn_hash").value;
+		out = web3.eth.getTransactionReceipt(hash);
+		template.find("#txn_out").innerHTML = out;
+	}
+});
 Template.map.helpers({
 	"drones":function(template){
 		return Drones.find(Meteor.userId()).fetch()[0]["data"];
@@ -280,7 +310,7 @@ Template.map.onRendered(function(){
 			position:{lat:parseFloat(temp['lat']),lng:parseFloat(temp['lng'])},
 			map:map,
 			title:temp['namething'],
-			icon:"drone.png"
+			icon:drone_icon
 		});
 		markers_drones.push(marker);
 	}
@@ -295,7 +325,7 @@ Template.map.onRendered(function(){
 			position:{lat:parseFloat(temp['lat']),lng:parseFloat(temp['lng'])},
 			map:map,
 			title:temp['keything'],
-			icon:"plug.png"
+			icon:pod_icon
 		});
 		markers_pods.push(marker);
 
@@ -310,7 +340,7 @@ Template.map.onRendered(function(){
 			position:{lat:parseFloat(temp['lat']),lng:parseFloat(temp['lng'])},
 			map:map,
 			title:temp['namething'],
-			icon:"warehouse.png"
+			icon:warehouse_icon
 		});
 		markers_warehouses.push(marker);
 	}
@@ -359,7 +389,7 @@ Template.map.events({
 			}	
 		}
 		});		
-		console.log(start_option.value);
+		console.log(mission_id);
 	//	mission_details = create_best_route("src_latlng","dst_latlng");
 		message = {
 			topics: [web3.fromAscii("mission_details")],
@@ -367,7 +397,6 @@ Template.map.events({
 		}
 		res = web3.shh.post(message);
 	//	console.log(message,res);
-		console.log(mission_id);
 		selected_marker = null;
 		for(i=0;i<markers_drones.length;i++){
 			if(markers_drones[i]["title"]==start_option.value){
@@ -390,7 +419,7 @@ Template.map.events({
 				if(responce.data.lat && responce.data.lng){
 					new_lat_lng = new google.maps.LatLng(parseFloat(responce.data["lat"]),parseFloat(responce.data["lng"]));
 					selected_marker.setPosition(new_lat_lng);
-					map.panTo(new_lat_lng);
+					//map.panTo(new_lat_lng);
 				}
 			});
 

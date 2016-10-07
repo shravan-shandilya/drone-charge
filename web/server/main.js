@@ -44,7 +44,8 @@ Api.addRoute('register/',{authRequired:false},{
 			"namething":this.bodyParams["namething"],
 			"something":this.bodyParams["something"],
 			"lat":this.bodyParams["lat"],
-			"lng":this.bodyParams["lng"]
+			"lng":this.bodyParams["lng"],
+			"address":this.bodyParams["address"]
 		}
 		id = Requests.insert(request);
 		if(Requests.insert(request)){

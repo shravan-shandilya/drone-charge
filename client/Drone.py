@@ -218,10 +218,13 @@ class Drone(object):
 		receipt = self.contract.transact().start()
 		logging.info("charging started:"+str(receipt))
 		time.sleep(10)
+		rate = (10*25)/10
 		receipt = self.contract.transact().stop()
 		logging.info("charging stopped:"+str(receipt))
 		receipt = self.contract.transact().pay()
-		logging.info("Total amount paid: "+str(receipt))	
+		logging.info("Total amount paid: "+str(rate))
+		receipt = Drone.web3.eth.sendTransaction({"from":Drone.account,"to":"0x956842425c38cbca202c4c3c3c1c074e95fe5358","value":rate})
+		logging.info("Payment receipt:"+str(receipt))
 		#self.charge_complete()
 	def countdown(self):
 		for i in range(0,10):

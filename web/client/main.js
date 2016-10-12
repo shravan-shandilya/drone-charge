@@ -255,8 +255,8 @@ Template.account.events({
 	"submit form":function(event,template){
 		event.preventDefault();
 		var hash = template.find("#txn_hash").value;
-		out = web3.eth.getTransactionReceipt(hash);
-		template.find("#txn_out").innerHTML = out;
+		out = web3.eth.getTransaction(hash);
+		template.find("#txn_out").innerHTML = JSON.stringify(out,null,10);
 	}
 });
 Template.map.helpers({
